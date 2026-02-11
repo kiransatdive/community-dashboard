@@ -61,12 +61,37 @@ export default async function Page({
     `${period}.json`
   );
 
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Leaderboard data not found for ${period}`);
+  // Handle missing leaderboard data gracefully
+  let data: LeaderboardJSON;
+  try {
+    if (!fs.existsSync(filePath)) {
+      // Return fallback data when file is missing
+      data = {
+        period,
+        updatedAt: Date.now(),
+        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+        endDate: new Date().toISOString(),
+        entries: [],
+        topByActivity: {},
+        hiddenRoles: []
+      };
+    } else {
+      const file = fs.readFileSync(filePath, "utf-8");
+      data = JSON.parse(file);
+    }
+  } catch (error) {
+    // Handle JSON parsing errors or other file issues
+    console.error(`Error loading leaderboard data for ${period}:`, error);
+    data = {
+      period,
+      updatedAt: Date.now(),
+      startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+      endDate: new Date().toISOString(),
+      entries: [],
+      topByActivity: {},
+      hiddenRoles: []
+    };
   }
-
-  const file = fs.readFileSync(filePath, "utf-8");
-  const data: LeaderboardJSON = JSON.parse(file);
 
   return (
     <Suspense fallback={<LeaderboardSkeleton count={10} variant={isGridView ? "grid" : "list"} />}>
