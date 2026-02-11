@@ -824,13 +824,25 @@ export default function LeaderboardView({
                     <SearchX className="h-8 w-8 text-[#50B78B]/70" />
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No results found</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  {entries.length === 0 ? (
+                    Date.now() - startDate.getTime() < 24 * 60 * 60 * 1000 ? 
+                      "No contributors with points in this period" :
+                      "Leaderboard data is temporarily unavailable"
+                  ) : (
+                    "No results found"
+                  )}
+                </h3>
                 <p className="text-muted-foreground mb-6">
-                  {entries.length === 0
-                    ? "No contributors with points in this period"
-                    : searchQuery
+                  {entries.length === 0 ? (
+                    Date.now() - startDate.getTime() < 24 * 60 * 60 * 1000 ? 
+                      "No contributors have earned points in this time period yet." :
+                      "Leaderboard data is temporarily unavailable. Please try again later."
+                  ) : (
+                    searchQuery
                       ? `No contributors matching "${searchQuery}"`
-                      : "No contributors match the selected filters"}
+                      : "No contributors match the selected filters"
+                  )}
                 </p>
                 {(searchQuery || selectedRoles.size > 0 || sortBy !== "points") && (
                   <Button
